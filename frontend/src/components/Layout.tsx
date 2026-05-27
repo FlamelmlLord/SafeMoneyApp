@@ -3,29 +3,51 @@ import { useAppStore, type DayBase } from '../store';
 
 const modulos = [
   { categoria: 'Fundamentos', items: [
+    { path: '/razones-proporciones', label: 'Razones y Proporciones' },
     { path: '/reparto-proporcional', label: 'Reparto Proporcional' },
-    { path: '/interes-simple', label: 'Interés Simple' },
-    { path: '/descuento-simple', label: 'Descuento Simple' },
   ]},
-  { categoria: 'Interés compuesto y tasas', items: [
-    { path: '/interes-compuesto', label: 'Interés Compuesto' },
+  { categoria: 'Repartos', items: [
+    { path: '/reparto-directo-simple', label: 'Directo Simple' },
+    { path: '/reparto-inverso-simple', label: 'Inverso Simple' },
+    { path: '/reparto-directo-compuesto', label: 'Directo Compuesto' },
+    { path: '/reparto-inverso-compuesto', label: 'Inverso Compuesto' },
+    { path: '/reparto-mixto', label: 'Reparto Mixto' },
+  ]},
+  { categoria: 'Interés Simple', items: [
+    { path: '/interes-simple', label: 'Cálculos Básicos' },
+    { path: '/interes-simple-metodos', label: 'Métodos (Bancario, Comercial, etc)' },
+  ]},
+  { categoria: 'Interés Compuesto', items: [
+    { path: '/interes-compuesto', label: 'Valor Futuro' },
+    { path: '/interes-compuesto-presente', label: 'Valor Presente' },
+    { path: '/interes-compuesto-tiempo', label: 'Tiempo' },
+    { path: '/interes-compuesto-tasa', label: 'Tasa' },
+    { path: '/capitalizacion', label: 'Capitalización' },
+  ]},
+  { categoria: 'Descuento Simple', items: [
+    { path: '/descuento-simple', label: 'Comercial' },
+    { path: '/descuento-racional', label: 'Racional (Matemático)' },
+  ]},
+  { categoria: 'Tasas', items: [
     { path: '/tasa-nominal-periodica', label: 'Nominal ↔ Periódica' },
-    { path: '/tasa-efectiva', label: 'Tasa Efectiva Anual' },
+    { path: '/tasa-efectiva', label: 'Efectiva Anual' },
     { path: '/equivalencia-tasas', label: 'Equivalencia de Tasas' },
     { path: '/tasa-anticipada-vencida', label: 'Anticipada ↔ Vencida' },
   ]},
-  { categoria: 'Series uniformes', items: [
-    { path: '/capitalizacion', label: 'Capitalización' },
-    { path: '/anualidades-vencidas', label: 'Anualidades Vencidas' },
-    { path: '/anualidades-anticipadas', label: 'Anualidades Anticipadas' },
-    { path: '/anualidades-diferidas', label: 'Anualidades Diferidas' },
-    { path: '/perpetuidades', label: 'Perpetuidades' },
+  { categoria: 'Ecuaciones de Valor', items: [
+    { path: '/ecuaciones-valor', label: 'Equivalencia en Fechas Focales' },
   ]},
-  { categoria: 'Amortización y avanzados', items: [
+  { categoria: 'Series Uniformes', items: [
+    { path: '/anualidades-vencidas', label: 'Anualidad Ordinaria (Vencida)' },
+    { path: '/anualidades-anticipadas', label: 'Anualidad Anticipada' },
+    { path: '/anualidades-diferidas', label: 'Anualidad Diferida' },
+    { path: '/perpetuidades', label: 'Perpetuidad' },
+    { path: '/anualidades-generales', label: 'Anualidad General' },
+  ]},
+  { categoria: 'Amortización', items: [
     { path: '/amortizacion', label: 'Tablas de Amortización' },
-    { path: '/abonos-extra-tiempo', label: 'Abonos Extra (reducir tiempo)' },
-    { path: '/abonos-extra-cuota', label: 'Abonos Extra (reducir cuota)' },
-    { path: '/ecuaciones-valor', label: 'Ecuaciones de Valor' },
+    { path: '/abonos-extra-tiempo', label: 'Abonos Extra (Reducir Tiempo)' },
+    { path: '/abonos-extra-cuota', label: 'Abonos Extra (Reducir Cuota)' },
   ]},
 ];
 
