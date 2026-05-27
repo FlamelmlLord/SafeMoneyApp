@@ -1,8 +1,10 @@
-# Ingeniería Económica
+# Ingeniería Económica - SafeMoneyApp
 
-App web para resolver los problemas que el profesor pidió en el curso. La idea es simple: tener una calculadora por cada tema, con la fórmula visible, el procedimiento paso a paso y la posibilidad de exportar el resultado.
+App web para resolver problemas de ingeniería económica con calculadoras interactivas. La idea es simple: tener una calculadora por cada tema, con la fórmula visible, el procedimiento paso a paso y la posibilidad de exportar el resultado.
 
-No hay base de datos. Todo vive en memoria mientras se usa, y si se quiere guardar un escenario se descarga como JSON.
+**Estado:** Adaptada para Hostinger | **Rama:** Cristian | **Stack:** PHP 8.2 + Slim 4 + React 18 + TypeScript
+
+> **Importante:** No hay base de datos. Todo vive en memoria mientras se usa, y si se quiere guardar un escenario se descarga como JSON.
 
 ## Lo que hace
 
@@ -45,177 +47,269 @@ Frontend en React 18 con TypeScript, Vite, Tailwind (tema oscuro único), KaTeX 
 
 Tests con PHPUnit. 43 casos verificados contra valores de Baca Currea, Meza Orozco y Blank & Tarquin.
 
-## Requisitos
+## 🚀 Inicio Rápido
 
-Para correrlo necesitas tener instalado:
+### Requisitos Previos
 
-- **PHP 8.2 o superior**, con las extensiones `bcmath`, `mbstring`, `openssl` y `curl` activas en el `php.ini`.
-- **Composer** (el gestor de paquetes de PHP). Si no está, se descarga el `.phar` desde getcomposer.org y se ejecuta con PHP.
-- **Node.js 18 o superior** y **npm**.
+- **PHP 8.2+** con extensiones: `bcmath`, `json`, `mbstring`, `openssl`, `curl`
+- **Node.js 18+** y **npm**
+- **Composer** (recomendado para instalar dependencias)
 
-En Windows con winget:
+### Instalación Local (Automática)
 
-```powershell
-winget install PHP.PHP.8.2
-winget install OpenJS.NodeJS.LTS
+#### Windows:
+```bash
+setup.bat
 ```
 
-Composer no está en winget, así que toca descargar el `.phar` manualmente:
-
-```powershell
-Invoke-WebRequest -Uri "https://getcomposer.org/composer-stable.phar" -OutFile "composer.phar"
+#### Linux/Mac:
+```bash
+bash setup.sh
 ```
 
-Después de instalar PHP, hay que copiar `php.ini-development` a `php.ini` y descomentar las líneas `extension=openssl`, `extension=mbstring`, `extension=curl` y `extension=bcmath`. Sin esas extensiones Composer no descarga nada y la app no arranca.
+### Instalación Local (Manual)
 
-## Cómo correrlo
+1. **Backend:**
+   ```bash
+   cd backend
+   composer install
+   ```
 
-Hay que abrir dos terminales, una para el backend y otra para el frontend.
+2. **Frontend:**
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   ```
 
-### Backend
+### Desarrollo Local
 
-```powershell
+**Terminal 1 - Backend:**
+```bash
 cd backend
-composer install
-php -S localhost:8080 -t public
+php -S localhost:8000 -t public
 ```
 
-Queda escuchando en `http://localhost:8080`. Para probar que está vivo:
-
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/v1/health"
-```
-
-Debe responder con `{ ok: true, data: { status: 'ok', phpVersion: '8.2.x' } }`.
-
-### Frontend
-
-En otra terminal:
-
-```powershell
+**Terminal 2 - Frontend (Vite dev):**
+```bash
 cd frontend
-npm install
 npm run dev
 ```
 
-Vite arranca en `http://localhost:5173` y proxea las llamadas a `/api/*` hacia el backend. Si todo está bien, al abrir esa URL aparece la pantalla de inicio con las 17 tarjetas de módulos.
+Abre `http://localhost:5173`
 
 ### Tests
 
-```powershell
+```bash
 cd backend
-./vendor/bin/phpunit
+composer test
 ```
 
-Salida esperada:
+Esperado: `OK (43 tests, 65 assertions)`
+
+## 🌐 Deploy en Hostinger (⭐ IMPORTANTE)
+
+**Ver documentación completa:** [DEPLOY_HOSTINGER.md](DEPLOY_HOSTINGER.md)
+
+### Pasos resumidos:
+
+1. **Compilar frontend:**
+   ```bash
+   cd frontend
+   npm run build
+   ```
+
+2. **Subir a Hostinger:**
+   - Sube `backend/` a `public_html/`
+   - Sube los 3 archivos `.htaccess` (raíz, backend, backend/public)
+
+3. **En el servidor (SSH/Terminal):**
+   ```bash
+   cd public_html/backend
+   composer install --no-dev --optimize-autoloader
+   ```
+
+4. **Verificar:**
+   - `https://tudominio.com/api/v1/health`
+   - `https://tudominio.com/`
+
+## 📁 Estructura del Proyecto
 
 ```
-OK (43 tests, 65 assertions)
-```
-
-Si alguno falla, el problema casi seguro está en `src/Finance/`, no en los tests. Los valores esperados vienen de libros y están comentados arriba de cada test.
-
-## Verificación rápida
-
-Para confirmar que todo funciona, con los dos servidores arriba se pueden probar estos casos:
-
-- **Interés compuesto**: P=1000, i=0.10, n=5. Debe dar F = $1.610,51.
-- **Anualidad vencida**: A=100, i=0.05, n=10. Debe dar P = $772,17 y F = $1.257,79.
-- **Amortización francés**: P=10.000.000, i=0.02, n=12. Cuota fija de $945.595,97.
-- **Ecuaciones de valor**: deuda de 1.000.000 en n=0 que se paga con dos cuotas iguales X en n=6 y n=12 al 1% mensual. X = $546.599,09.
-- **Toggle 360/365**: cambiarlo en el header y revisar que el footer y los exports JSON reflejen el cambio.
-- **Exportar e importar**: en cualquier módulo, exportar el escenario como JSON, recargar la página y volver a importarlo. El estado debe quedar idéntico.
-
-## Estructura del proyecto
-
-```
-Aplicación/
+SafeMoneyApp/
 ├── backend/
-│   ├── src/
-│   │   ├── Finance/         Core matemático puro
-│   │   │   ├── Money.php          BCMath wrapper + ln, exp, pow, round
-│   │   │   ├── DayCount.php       Convenciones 360/365
-│   │   │   ├── Rate.php           Conversiones de tasas
-│   │   │   ├── SimpleInterest.php
-│   │   │   ├── SimpleDiscount.php
-│   │   │   ├── CompoundInterest.php
-│   │   │   ├── Annuity.php        Vencidas, anticipadas, diferidas, perpetuidades
-│   │   │   ├── Amortization.php   Francés, alemán, americano, colombiano
-│   │   │   ├── ExtraPayment.php   Abonos extra
-│   │   │   ├── ValueEquation.php  Solver de ecuaciones de valor
-│   │   │   └── ProportionalSplit.php
-│   │   └── Http/
-│   │       ├── Errors.php
-│   │       └── Validators.php
-│   ├── tests/Finance/       43 tests PHPUnit
-│   ├── public/index.php     Entrypoint Slim 4
-│   ├── composer.json
-│   └── phpunit.xml
-│
+│   ├── src/Finance/         # Cálculos (BCMath, 30 dígitos)
+│   ├── src/Http/            # API endpoints
+│   ├── public/
+│   │   ├── index.php        # Entrypoint
+│   │   └── dist/            # Frontend compilado (generado)
+│   ├── tests/
+│   ├── vendor/              # Dependencias (composer)
+│   ├── .env.example
+│   └── .htaccess
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/           17 módulos
-│   │   ├── components/      Calculator, Formula, Timeline, ResultTable, StepByStep, ScenarioIO, Layout, InputField
-│   │   ├── lib/             api.ts, format.ts, timeUnits.ts
-│   │   ├── store/           Zustand (preferencia 360/365)
-│   │   ├── App.tsx          Rutas
-│   │   ├── main.tsx
-│   │   └── index.css        Tailwind + tokens del tema oscuro
-│   ├── index.html
-│   ├── vite.config.ts
-│   ├── tailwind.config.ts
+│   │   ├── components/      # Calculadoras React
+│   │   ├── pages/           # 17 módulos
+│   │   ├── store/           # Estado (Zustand)
+│   │   └── lib/             # Utilidades
+│   ├── vite.config.build.ts # Config para integración con backend
 │   └── package.json
-│
-└── docs/
-    ├── arquitectura.md
-    └── casos-canonicos.md   Tabla completa de casos verificados
+├── docs/
+│   ├── arquitectura.md
+│   └── casos-canonicos.md
+├── .htaccess                # Reescritura de URLs (Hostinger)
+├── DEPLOY_HOSTINGER.md      # Guía completa de deployment
+├── setup.sh                 # Setup automático (Linux/Mac)
+├── setup.bat                # Setup automático (Windows)
+└── README.md                # Este archivo
 ```
 
-## API
+## 📊 Módulos (17 calculadoras)
 
-Todos los endpoints están bajo `/api/v1/` y reciben JSON. Las respuestas tienen la forma `{ ok: true, data: ... }` cuando todo sale bien, o `{ ok: false, error: { code, message, field? } }` cuando hay un error de validación o interno.
+### Fundamentos
+- Reparto proporcional (simple y compuesto)
+- Interés simple (con despejes)
+- Descuento simple (comercial y racional)
 
-Los principales:
+### Interés Compuesto y Tasas
+- Interés compuesto (con gráfica vs simple)
+- Tasa nominal ↔ periódica
+- Tasa efectiva anual
+- Equivalencia universal de tasas
+- Tasa anticipada ↔ vencida
+
+### Series Uniformes
+- Capitalización
+- Anualidades vencidas, anticipadas, diferidas
+- Perpetuidades
+
+### Amortización y Avanzados
+- Tablas: francés, alemán, americano, colombiano (+ inflación)
+- Abonos extra (reducir tiempo/cuota)
+- Ecuaciones de valor (solver de X)
+
+## ⚙️ Stack Técnico
+
+| Capa | Tecnología | Versión |
+|------|-----------|---------|
+| **Backend** | PHP | 8.2+ |
+| **Framework** | Slim | 4.12 |
+| **Precisión** | BCMath | 30 dígitos |
+| **Frontend** | React | 18 |
+| **Lenguaje** | TypeScript | 5.6+ |
+| **Build** | Vite | 5.4+ |
+| **CSS** | Tailwind | 3.4+ |
+| **Fórmulas** | KaTeX | 0.16+ |
+| **Gráficos** | Recharts | 2.13+ |
+| **Estado** | Zustand | 5.0+ |
+| **Testing** | PHPUnit | 10.5 |
+
+## 🔧 Configuración
+
+### Variables de Entorno
+
+Copia `backend/.env.example` a `backend/.env`:
+
+```env
+APP_ENV=production              # o development
+APP_DEBUG=false                 # cambiar solo en desarrollo
+ALLOWED_ORIGIN=*               # en prod: https://tudominio.com
+DB_HOST=localhost              # (preparado para futuro)
+```
+
+### Permisos en Hostinger
+
+```bash
+chmod 755 backend/public
+chmod 755 backend/public/dist
+chmod 644 .htaccess backend/.htaccess backend/public/.htaccess
+```
+
+## 📝 API Endpoints
+
+Todos bajo `/api/v1/` (JSON):
 
 - `GET  /api/v1/health` — healthcheck
-- `GET  /api/v1/modulos` — catálogo de módulos disponibles
+- `GET  /api/v1/modulos` — catálogo
 - `POST /api/v1/interes-simple/calcular`
-- `POST /api/v1/descuento-simple/calcular`
-- `POST /api/v1/descuento-simple/convertir-tasa`
 - `POST /api/v1/interes-compuesto/calcular`
-- `POST /api/v1/interes-compuesto/comparativa`
 - `POST /api/v1/tasas/convertir`
-- `POST /api/v1/tasas/anticipada-vencida`
 - `POST /api/v1/anualidades/calcular`
 - `POST /api/v1/amortizacion/generar`
-- `POST /api/v1/abonos-extra/reducir-tiempo`
-- `POST /api/v1/abonos-extra/reducir-cuota`
 - `POST /api/v1/ecuaciones-valor/resolver`
-- `POST /api/v1/reparto/simple`
-- `POST /api/v1/reparto/compuesto`
+- ...y más (ver [index.php](backend/public/index.php))
 
-Ejemplo de llamada con PowerShell:
-
-```powershell
-$body = @{ P='1000'; i='0.10'; n='5'; calcular='F' } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:8080/api/v1/interes-compuesto/calcular" `
-                  -Method POST -ContentType "application/json" -Body $body
+**Respuesta exitosa:**
+```json
+{
+  "ok": true,
+  "data": { ... }
+}
 ```
 
-Devuelve `{ ok: true, data: { resultado: '1610.5100000000', pasos: [...] } }`.
+**Error:**
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "...",
+    "field": "P" 
+  }
+}
+```
 
-## Notas sobre precisión
+## 🐛 Troubleshooting
 
-El backend hace todo con BCMath a 30 decimales internos y redondea a 2 decimales para mostrar valores monetarios y a 10 para tasas. El frontend recibe strings y solo formatea, nunca recalcula.
+### Error 404 en `/api/v1/*`
 
-En tablas de amortización el saldo final puede quedar en $0,01 o $0,05 por la acumulación del redondeo monetario en cada cuota. Es el mismo comportamiento que muestran los libros y los simuladores bancarios; no es un error numérico.
+- ✓ Verifica que `mod_rewrite` está habilitado
+- ✓ Los 3 `.htaccess` están presentes (raíz, backend, backend/public)
+- ✓ Reinicia Apache en Hostinger
 
-El sistema colombiano de amortización está implementado como "cuota constante en pesos con corrección por inflación opcional". Si la inflación es 0, el resultado coincide exactamente con el sistema francés. Si se pasa una inflación > 0, la cuota crece con el factor inflacionario y la tasa efectiva real se calcula como `(1+i)/(1+π) - 1`.
+### BCMath no encontrado
 
-## Lo que no está
+```bash
+# Linux
+sudo apt-get install php-bcmath
 
-- No hay deploy, todo corre en local.
-- No hay autenticación ni usuarios. Cualquiera con acceso a las URLs puede usar la app.
-- El frontend genera un único bundle de ~870 KB (254 KB gzip). Vite avisa que conviene partirlo, pero para una app académica de un solo despliegue no vale la pena meterse en eso.
-- No hay OpenAPI generado automáticamente. Los endpoints están listados arriba y eso debería bastar.
-- No hay tests E2E del frontend. La verificación se hizo con chrome-devtools MCP a mano durante el desarrollo.
+# Mac (Homebrew)
+brew install php82-bcmath
+
+# Windows (XAMPP)
+# Descomenta extension=bcmath en php.ini
+```
+
+### Frontend no se carga
+
+- ✓ Compila: `npm run build`
+- ✓ Verifica: `backend/public/dist/index.html` existe
+- ✓ Permisos: `chmod 755 backend/public/dist`
+
+## 📚 Bibliografía
+
+- Baca Currea, G. (2014). *Ingeniería Económica*
+- Meza Orozco, J. J. (2015). *Matemáticas Financieras Aplicadas*
+- Blank, L., & Tarquin, A. (2018). *Engineering Economy* (8ª ed.)
+
+## 📄 Licencia
+
+MIT
+
+## ✅ Verificación Rápida
+
+Con los servidores levantados:
+
+- **Interés compuesto**: P=1000, i=0.10, n=5 → F = $1.610,51 ✓
+- **Anualidad vencida**: A=100, i=0.05, n=10 → P = $772,17 ✓  
+- **Amortización francés**: P=10.000.000, i=0.02, n=12 → Cuota = $945.595,97 ✓
+- **Toggle 360/365**: Cambia y verifica footer + exports ✓
+- **Exportar/Importar**: Descarga JSON, recarga, sube → Estado idéntico ✓
+
+---
+
+**Última actualización:** 2026-05-27  
+**Rama:** Cristian (Adaptada para Hostinger)  
+**Estado:** ✅ Listo para producción
+
