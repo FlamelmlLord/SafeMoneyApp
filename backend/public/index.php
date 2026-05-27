@@ -136,12 +136,27 @@ $app->post('/api/v1/razones/calcular', function ($req, $res) {
             Validators::num($b, 'b')
         );
     } else {
-        // proporcion
-        $data = RazonesProporciones::cuartaProporcional(
-            Validators::num($b, 'a'),
-            Validators::num($b, 'b'),
-            Validators::num($b, 'c')
-        );
+        // proporcion - puede calcular X o C
+        // 'calcular' es opcional; por defecto asumimos 'x' si no se proporciona
+        $calcular = Validators::str($b, 'calcular', ['x', 'c'], false);
+        if ($calcular === null) {
+            $calcular = 'x';
+        }
+        
+        if ($calcular === 'x') {
+            $data = RazonesProporciones::cuartaProporcional(
+                Validators::num($b, 'a'),
+                Validators::num($b, 'b'),
+                Validators::num($b, 'c')
+            );
+        } else {
+            // calcular C
+            $data = RazonesProporciones::calcularC(
+                Validators::num($b, 'a'),
+                Validators::num($b, 'b'),
+                Validators::num($b, 'x')
+            );
+        }
     }
     
     return Errors::ok($res, $data);
