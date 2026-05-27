@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Calculator } from '../components/Calculator';
+import { InputField, ResultValue, SelectField } from '../components/InputField';
 import { apiPost } from '../lib/api';
 
 interface State {
@@ -36,37 +37,25 @@ export const RazonesProporciones = () => {
   return (
     <Calculator
       title="Razones y Proporciones"
+      category="Fundamentos"
       description="Comparación entre cantidades y equivalencia de razones"
-      inputs={[
-        {
-          label: 'Modo',
-          type: 'select',
-          value: state.modo,
-          options: [
+      inputs={
+        <div className="space-y-3">
+          <SelectField label="Modo" value={state.modo} onChange={(v) => setState({ ...state, modo: v as any })} options={[
             { value: 'razon', label: 'Razón Simple' },
             { value: 'proporcion', label: 'Proporción' },
-          ],
-          onChange: (e) => setState({ ...state, modo: e.target.value as 'razon' | 'proporcion' }),
-        },
-        {
-          label: 'Valor A',
-          value: state.a,
-          onChange: (e) => setState({ ...state, a: e.target.value }),
-        },
-        {
-          label: 'Valor B',
-          value: state.b,
-          onChange: (e) => setState({ ...state, b: e.target.value }),
-        },
-        ...(state.modo === 'proporcion' ? [{
-          label: 'Valor C',
-          value: state.c,
-          onChange: (e) => setState({ ...state, c: e.target.value }),
-        }] : []),
-      ]}
-      result={result}
-      error={error}
-      onCalculate={calcular}
+          ]} />
+          <InputField label="Valor A" value={state.a} onChange={(v) => setState({ ...state, a: v })} />
+          <InputField label="Valor B" value={state.b} onChange={(v) => setState({ ...state, b: v })} />
+          {state.modo === 'proporcion' && <InputField label="Valor C" value={state.c} onChange={(v) => setState({ ...state, c: v })} />}
+        </div>
+      }
+      actions={<button className="btn-primary" onClick={calcular}>Calcular</button>}
+      results={error ? <div className="text-danger">{error}</div> : result ? (
+        <div className="space-y-3">
+          <ResultValue label="Resultado" value={JSON.stringify(result)} highlight />
+        </div>
+      ) : null}
     />
   );
 };

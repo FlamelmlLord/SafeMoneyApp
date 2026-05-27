@@ -6,11 +6,10 @@ export const RepartoInversoCompuesto = () => {
   return (
     <Calculator
       title="Reparto Proporcional Inverso Compuesto"
+      category="Repartos"
       description="Distribuye inversamente según múltiples criterios"
-      inputs={[]}
-      result={null}
-      error={error}
-      onCalculate={() => {}}
+      inputs={<div className="text-text-muted text-sm italic">En desarrollo</div>}
+      results={<div className="text-danger">{error}</div>}
     />
   );
 };

@@ -1,2 +1,4 @@
-// Reparto Proporcional Directo Simple - Redirige a RepartoProporcional
-export { RepartoProporcional as RepartoDirectoSimple } from './RepartoProporcional';
+import { RepartoProporcional } from './RepartoProporcional';
+
+// Reutiliza la misma página de Reparto Proporcional
+export { RepartoProporcional as RepartoDirectoSimple };

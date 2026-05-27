@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Calculator } from '../components/Calculator';
+import { InputField, ResultValue, SelectField } from '../components/InputField';
 import { apiPost } from '../lib/api';
+import { fmtCOP, fmtRate } from '../lib/format';
 
 interface State {
   P: string;
@@ -40,27 +42,28 @@ export const InteresSimpleMetodos = () => {
   return (
     <Calculator
       title="Interés Simple - Métodos de Cálculo"
+      category="Interés Simple"
       description="Calcula interés simple usando diferentes métodos (Bancario, Comercial, Racional, Ideal)"
-      inputs={[
-        {
-          label: 'Método',
-          type: 'select',
-          value: state.metodo,
-          options: [
+      inputs={
+        <div className="space-y-3">
+          <SelectField label="Método" value={state.metodo} onChange={(v) => setState({ ...state, metodo: v as any })} options={[
             { value: 'bancario', label: 'Bancario (360 días, mes exacto)' },
             { value: 'comercial', label: 'Comercial (360 días, mes 30)' },
             { value: 'racional', label: 'Racional (365 días, exacto)' },
             { value: 'ideal', label: 'Ideal (365 días, mes 30)' },
-          ],
-          onChange: (e) => setState({ ...state, metodo: e.target.value as any }),
-        },
-        { label: 'Capital (P)', value: state.P, onChange: (e) => setState({ ...state, P: e.target.value }) },
-        { label: 'Tasa (i)', value: state.i, onChange: (e) => setState({ ...state, i: e.target.value }) },
-        { label: 'Días (n)', value: state.n, onChange: (e) => setState({ ...state, n: e.target.value }) },
-      ]}
-      result={result}
-      error={error}
-      onCalculate={calcular}
+          ]} />
+          <InputField label="Capital (P)" value={state.P} onChange={(v) => setState({ ...state, P: v })} suffix="COP" />
+          <InputField label="Tasa (i)" value={state.i} onChange={(v) => setState({ ...state, i: v })} hint="Decimal: 0.10 = 10%" />
+          <InputField label="Días (n)" value={state.n} onChange={(v) => setState({ ...state, n: v })} />
+        </div>
+      }
+      actions={<button className="btn-primary" onClick={calcular}>Calcular</button>}
+      results={error ? <div className="text-danger">{error}</div> : result ? (
+        <div className="space-y-3">
+          <ResultValue label="Valor Futuro" value={fmtCOP(result.F)} highlight />
+          <ResultValue label="Interés" value={fmtCOP(result.I)} />
+        </div>
+      ) : null}
     />
   );
 };

@@ -1,21 +1,24 @@
 import { useState } from 'react';
 import { Calculator } from '../components/Calculator';
+import { InputField, ResultValue, SelectField } from '../components/InputField';
 import { apiPost } from '../lib/api';
+import { fmtCOP, fmtRate } from '../lib/format';
 
+type Var = 'Dr' | 'F' | 'i' | 'n';
 interface State {
+  calcular: Var;
   P: string;
-  A: string;
+  F: string;
   i: string;
   n: string;
-  calcular: 'Dr' | 'i' | 'n' | 'F';
 }
 
 const inicial: State = {
+  calcular: 'Dr',
   P: '1000000',
-  A: '100000',
+  F: '100000',
   i: '0.10',
   n: '180',
-  calcular: 'Dr',
 };
 
 export const DescuentoRacional = () => {
@@ -38,27 +41,27 @@ export const DescuentoRacional = () => {
   return (
     <Calculator
       title="Descuento Simple - Método Racional"
+      category="Descuento Simple"
       description="Calcula el descuento racional, también conocido como descuento matemático"
-      inputs={[
-        {
-          label: 'Qué calcular',
-          type: 'select',
-          value: state.calcular,
-          options: [
+      inputs={
+        <div className="space-y-3">
+          <SelectField label="¿Qué deseas calcular?" value={state.calcular} onChange={(v) => setState({ ...state, calcular: v as Var })} options={[
             { value: 'Dr', label: 'Descuento Racional' },
             { value: 'F', label: 'Valor Futuro' },
             { value: 'i', label: 'Tasa de Interés' },
             { value: 'n', label: 'Tiempo' },
-          ],
-          onChange: (e) => setState({ ...state, calcular: e.target.value as any }),
-        },
-        { label: 'Valor Presente (P)', value: state.P, onChange: (e) => setState({ ...state, P: e.target.value }) },
-        { label: 'Tasa (i)', value: state.i, onChange: (e) => setState({ ...state, i: e.target.value }) },
-        { label: 'Días (n)', value: state.n, onChange: (e) => setState({ ...state, n: e.target.value }) },
-      ]}
-      result={result}
-      error={error}
-      onCalculate={calcular}
+          ]} />
+          <InputField label="Valor Presente (P)" value={state.P} onChange={(v) => setState({ ...state, P: v })} suffix="COP" />
+          <InputField label="Tasa (i)" value={state.i} onChange={(v) => setState({ ...state, i: v })} hint="Decimal: 0.10 = 10%" />
+          <InputField label="Días (n)" value={state.n} onChange={(v) => setState({ ...state, n: v })} />
+        </div>
+      }
+      actions={<button className="btn-primary" onClick={calcular}>Calcular</button>}
+      results={error ? <div className="text-danger">{error}</div> : result ? (
+        <div className="space-y-3">
+          <ResultValue label={`${state.calcular === 'i' ? 'Tasa' : state.calcular === 'n' ? 'Días' : 'Descuento Racional'}`} value={fmtCOP(result.resultado)} highlight />
+        </div>
+      ) : null}
     />
   );
 };

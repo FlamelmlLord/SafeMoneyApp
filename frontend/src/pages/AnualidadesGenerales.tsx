@@ -6,11 +6,10 @@ export const AnualidadesGenerales = () => {
   return (
     <Calculator
       title="Series Uniformes - Anualidades Generales"
+      category="Series Uniformes"
       description="Anualidades con períodos de capitalización diferente al período de pago"
-      inputs={[]}
-      result={null}
-      error={error}
-      onCalculate={() => {}}
+      inputs={<div className="text-text-muted text-sm italic">En desarrollo</div>}
+      results={<div className="text-danger">{error}</div>}
     />
   );
 };

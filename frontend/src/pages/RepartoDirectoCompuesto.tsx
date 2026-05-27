@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Calculator } from '../components/Calculator';
+import { InputField, ResultValue } from '../components/InputField';
 import { apiPost } from '../lib/api';
 
 interface PartesCompuesto { nombre: string; capital: string; tiempo: string }
@@ -34,13 +35,24 @@ export const RepartoDirectoCompuesto = () => {
   return (
     <Calculator
       title="Reparto Proporcional Directo Compuesto"
+      category="Repartos"
       description="Distribuye un monto según múltiples criterios (ej: capital × tiempo)"
-      inputs={[
-        { label: 'Monto Total', value: state.monto, onChange: (e) => setState({ ...state, monto: e.target.value }) },
-      ]}
-      result={result}
-      error={error}
-      onCalculate={calcular}
+      inputs={
+        <div className="space-y-3">
+          <InputField label="Monto Total" value={state.monto} onChange={(v) => setState({ ...state, monto: v })} suffix="COP" />
+        </div>
+      }
+      actions={<button className="btn-primary" onClick={calcular}>Calcular</button>}
+      results={error ? <div className="text-danger">{error}</div> : result ? (
+        <div className="space-y-3">
+          <ResultValue label="Monto Total" value={state.monto} highlight />
+          {result.partes?.map((p: any, i: number) => (
+            <div key={i} className="text-text-muted text-sm">
+              {p.nombre}: {p.parte}
+            </div>
+          ))}
+        </div>
+      ) : null}
     />
   );
 };
