@@ -67,33 +67,113 @@ export const EcuacionesValor = () => {
       description="Resuelve una incógnita X dentro de una ecuación de valor con múltiples flujos en distintas fechas. Los flujos se llevan a una fecha focal con la tasa periódica equivalente."
       formula="\sum_{izquierda} F_k (1+i)^{focal - k} = \sum_{derecha} F_k (1+i)^{focal - k}"
       inputs={
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <InputField label="Tasa periódica i" value={s.i} onChange={(v) => setS({ ...s, i: v })} />
-            <InputField label="Fecha focal" value={s.fechaFocal} onChange={(v) => setS({ ...s, fechaFocal: v })} />
+        <div className="space-y-4">
+          <InputField
+            label="Tasa periódica i"
+            value={s.i}
+            onChange={(v) => setS({ ...s, i: v })}
+            hint="Tasa efectiva del período en que se expresa la línea de tiempo. Ej. 0.01 = 1% mensual."
+          />
+
+          <div>
+            <label className="label">Fecha focal (período de referencia)</label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn-outline px-3 py-2 font-mono"
+                onClick={() => setS({ ...s, fechaFocal: String(Math.max(0, Number(s.fechaFocal) - 1)) })}
+                aria-label="Disminuir fecha focal"
+              >
+                −
+              </button>
+              <input
+                className="input text-center font-mono"
+                value={s.fechaFocal}
+                onChange={(e) => setS({ ...s, fechaFocal: e.target.value })}
+                inputMode="numeric"
+              />
+              <button
+                type="button"
+                className="btn-outline px-3 py-2 font-mono"
+                onClick={() => setS({ ...s, fechaFocal: String(Number(s.fechaFocal) + 1) })}
+                aria-label="Aumentar fecha focal"
+              >
+                +
+              </button>
+            </div>
+            <div className="text-xs text-text-subtle mt-1">
+              Período al que se llevan todos los flujos para plantear la ecuación. Puede ser 0 (presente), el período de alguno de los flujos o cualquier otro punto.
+            </div>
           </div>
+
           <div className="space-y-2">
-            <label className="label">Flujos</label>
+            <label className="label">Flujos de la línea de tiempo</label>
+            <p className="text-xs text-text-subtle -mt-1 mb-2">
+              Cada fila es un flujo. <span className="text-success">Izquierda</span> son los valores que se reciben o se deben (deudas); <span className="text-danger">derecha</span> son los pagos que cancelan esos valores. Marca <em>Contiene X</em> en los flujos cuya cuantía es la incógnita.
+            </p>
+
+            {/* Encabezados de columna */}
+            <div className="grid grid-cols-[1fr,5rem,8rem,auto] gap-2 px-2 text-[11px] uppercase tracking-wider text-text-subtle font-semibold">
+              <span>Monto (COP)</span>
+              <span>Período</span>
+              <span>Lado de la ecuación</span>
+              <span className="sr-only">Eliminar</span>
+            </div>
+
             {s.flujos.map((f, i) => (
               <div key={i} className="border border-bg-border rounded-lg p-2 space-y-2 bg-bg-elevated/30">
-                <div className="grid grid-cols-[1fr,5rem,7rem,auto] gap-2 items-center">
-                  <input className="input" disabled={f.tieneX} value={f.tieneX ? '(X)' : f.monto} onChange={(e) => setFlujo(i, 'monto', e.target.value)} placeholder="Monto" />
-                  <input className="input" value={f.periodo} type="number" onChange={(e) => setFlujo(i, 'periodo', Number(e.target.value))} placeholder="Periodo" />
-                  <select className="input" value={f.lado} onChange={(e) => setFlujo(i, 'lado', e.target.value as any)}>
-                    <option value="izquierda">Izquierda</option>
-                    <option value="derecha">Derecha</option>
+                <div className="grid grid-cols-[1fr,5rem,8rem,auto] gap-2 items-center">
+                  <input
+                    className="input"
+                    disabled={f.tieneX}
+                    value={f.tieneX ? '(incógnita X)' : f.monto}
+                    onChange={(e) => setFlujo(i, 'monto', e.target.value)}
+                    placeholder="Ej. 1000000"
+                    aria-label={`Monto del flujo ${i + 1}`}
+                  />
+                  <input
+                    className="input text-center"
+                    value={f.periodo}
+                    type="number"
+                    min={0}
+                    onChange={(e) => setFlujo(i, 'periodo', Number(e.target.value))}
+                    placeholder="0"
+                    aria-label={`Período del flujo ${i + 1}`}
+                  />
+                  <select
+                    className="input"
+                    value={f.lado}
+                    onChange={(e) => setFlujo(i, 'lado', e.target.value as any)}
+                    aria-label={`Lado del flujo ${i + 1}`}
+                  >
+                    <option value="izquierda">Izquierda (deuda)</option>
+                    <option value="derecha">Derecha (pago)</option>
                   </select>
-                  <button className="btn-ghost px-2" onClick={() => removeFlujo(i)}>✕</button>
+                  <button
+                    className="btn-ghost px-2"
+                    onClick={() => removeFlujo(i)}
+                    aria-label={`Eliminar flujo ${i + 1}`}
+                  >
+                    ✕
+                  </button>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-text-muted pl-1">
-                  <label className="flex items-center gap-1">
-                    <input type="checkbox" checked={f.tieneX} onChange={(e) => setFlujo(i, 'tieneX', e.target.checked)} />
-                    Contiene X
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={f.tieneX}
+                      onChange={(e) => setFlujo(i, 'tieneX', e.target.checked)}
+                    />
+                    Este flujo contiene la incógnita X
                   </label>
                   {f.tieneX && (
-                    <label className="flex items-center gap-1">
-                      Coeficiente:
-                      <input className="input w-16 py-0.5 text-xs" value={f.coeficienteX} onChange={(e) => setFlujo(i, 'coeficienteX', e.target.value)} />
+                    <label className="flex items-center gap-1.5">
+                      <span>Coeficiente que multiplica a X:</span>
+                      <input
+                        className="input w-16 py-0.5 text-xs font-mono"
+                        value={f.coeficienteX}
+                        onChange={(e) => setFlujo(i, 'coeficienteX', e.target.value)}
+                      />
                     </label>
                   )}
                 </div>

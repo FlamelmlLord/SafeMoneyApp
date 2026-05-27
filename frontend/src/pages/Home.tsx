@@ -39,6 +39,26 @@ export const Home = () => {
         </p>
       </header>
 
+      <section className="card border-accent/30 bg-accent-subtle/30">
+        <h2 className="text-sm uppercase tracking-wider text-text-muted font-semibold mb-3">
+          Integrantes del grupo
+        </h2>
+        <ul className="space-y-1.5 text-sm">
+          <li className="flex items-baseline justify-between gap-4">
+            <span className="text-text">Carlos Guerrero</span>
+            <span className="font-mono text-text-muted">20261678028</span>
+          </li>
+          <li className="flex items-baseline justify-between gap-4">
+            <span className="text-text">Cristian Triana</span>
+            <span className="font-mono text-text-muted">20262678003</span>
+          </li>
+          <li className="flex items-baseline justify-between gap-4">
+            <span className="text-text">Nicolás Caicedo</span>
+            <span className="font-mono text-text-muted">20261678010</span>
+          </li>
+        </ul>
+      </section>
+
       <section>
         <h2 className="text-lg font-semibold mb-4 text-text-muted">Módulos disponibles</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">

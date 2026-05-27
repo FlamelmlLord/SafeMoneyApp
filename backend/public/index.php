@@ -38,10 +38,29 @@ $app->add(function (ServerRequestInterface $request, $handler): ResponseInterfac
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 $errorMiddleware->setDefaultErrorHandler(function (ServerRequestInterface $req, \Throwable $e, bool $disp, bool $log, bool $logErr) {
     $response = new \Slim\Psr7\Response();
-    $code = $e instanceof InvalidArgumentException ? 'VALIDATION_ERROR' : 'INTERNAL_ERROR';
-    $status = $e instanceof InvalidArgumentException ? 400 : 500;
-    return Errors::fail($response, $code, $e->getMessage(), null, $status);
+    if ($e instanceof \Slim\Exception\HttpNotFoundException) {
+        return Errors::fail($response, 'NOT_FOUND', 'Ruta no encontrada: ' . $req->getUri()->getPath() . '. Las rutas válidas viven bajo /api/v1/', null, 404);
+    }
+    if ($e instanceof \Slim\Exception\HttpMethodNotAllowedException) {
+        return Errors::fail($response, 'METHOD_NOT_ALLOWED', $e->getMessage(), null, 405);
+    }
+    if ($e instanceof InvalidArgumentException) {
+        return Errors::fail($response, 'VALIDATION_ERROR', $e->getMessage(), null, 400);
+    }
+    return Errors::fail($response, 'INTERNAL_ERROR', $e->getMessage(), null, 500);
 });
+
+// Página raíz: pequeño descubrimiento de la API. El frontend vive en :5173.
+$app->get('/', fn($req, $res) => Errors::ok($res, [
+    'app' => 'Ingeniería Económica - API',
+    'version' => 'v1',
+    'frontend' => 'http://localhost:5173',
+    'endpoints' => [
+        'health' => '/api/v1/health',
+        'modulos' => '/api/v1/modulos',
+    ],
+    'nota' => 'Esta es la API. Para usar la app abre el frontend en http://localhost:5173',
+]));
 
 // Healthcheck
 $app->get('/api/v1/health', fn($req, $res) => Errors::ok($res, ['status' => 'ok', 'phpVersion' => PHP_VERSION]));
