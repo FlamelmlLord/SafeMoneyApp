@@ -22,8 +22,8 @@ class RazonesProporciones
      */
     public static function razonSimple($a, $b): array
     {
-        $a = Money::parse($a);
-        $b = Money::parse($b);
+        $a = Money::normalize($a);
+        $b = Money::normalize($b);
         
         if ($b === '0') {
             throw new InvalidArgumentException('El divisor no puede ser cero');
@@ -36,7 +36,7 @@ class RazonesProporciones
             'b' => $b,
             'razon' => $razon,
             'razonFormato' => "$a : $b",
-            'valor' => round((float) $razon, 4),
+            'valor' => $razon,
         ];
     }
 
@@ -51,9 +51,9 @@ class RazonesProporciones
      */
     public static function cuartaProporcional($a, $b, $c): array
     {
-        $a = Money::parse($a);
-        $b = Money::parse($b);
-        $c = Money::parse($c);
+        $a = Money::normalize($a);
+        $b = Money::normalize($b);
+        $c = Money::normalize($c);
         
         if ($a === '0') {
             throw new InvalidArgumentException('El divisor no puede ser cero');
@@ -91,7 +91,7 @@ class RazonesProporciones
      */
     public static function divisionProporcional($monto, array $indices): array
     {
-        $monto = Money::parse($monto);
+        $monto = Money::normalize($monto);
         
         if (empty($indices)) {
             throw new InvalidArgumentException('Debe proporcionar al menos un índice');
@@ -100,7 +100,7 @@ class RazonesProporciones
         // Suma de todos los índices
         $sumaIndices = '0';
         foreach ($indices as $idx) {
-            $idx = Money::parse($idx);
+            $idx = Money::normalize($idx);
             $sumaIndices = bcadd($sumaIndices, $idx, self::SCALE);
         }
         
@@ -112,7 +112,7 @@ class RazonesProporciones
         $partes = [];
         $sumaPartes = '0';
         foreach ($indices as $idx) {
-            $idx = Money::parse($idx);
+            $idx = Money::normalize($idx);
             $razon = bcdiv($idx, $sumaIndices, self::SCALE);
             $parte = bcmul($monto, $razon, self::SCALE);
             $partes[] = [
@@ -146,11 +146,11 @@ class RazonesProporciones
      */
     public static function proporcionCompuesta($a, $b, $c, $d, $e): array
     {
-        $a = Money::parse($a);
-        $b = Money::parse($b);
-        $c = Money::parse($c);
-        $d = Money::parse($d);
-        $e = Money::parse($e);
+        $a = Money::normalize($a);
+        $b = Money::normalize($b);
+        $c = Money::normalize($c);
+        $d = Money::normalize($d);
+        $e = Money::normalize($e);
         
         // (a/b) * (c/d) = e/x
         // x = (e * b * d) / (a * c)
@@ -175,3 +175,4 @@ class RazonesProporciones
         ];
     }
 }
+

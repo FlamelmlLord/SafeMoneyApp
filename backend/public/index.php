@@ -128,7 +128,7 @@ $app->post('/api/v1/reparto/compuesto', function ($req, $res) {
 // ─── Razones y proporciones ───────────────────────────────────────────────
 $app->post('/api/v1/razones/calcular', function ($req, $res) {
     $b = (array) $req->getParsedBody();
-    $modo = Validators::str($b, 'modo', ['razon', 'proporcion'], 'razon');
+    $modo = Validators::str($b, 'modo', ['razon', 'proporcion']);
     
     if ($modo === 'razon') {
         $data = RazonesProporciones::razonSimple(
