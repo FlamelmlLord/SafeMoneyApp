@@ -4,7 +4,6 @@ import { useAppStore, type DayBase } from '../store';
 const modulos = [
   { categoria: 'Fundamentos', items: [
     { path: '/razones-proporciones', label: 'Razones y Proporciones' },
-    { path: '/reparto-proporcional', label: 'Reparto Proporcional' },
   ]},
   { categoria: 'Repartos', items: [
     { path: '/reparto-directo-simple', label: 'Directo Simple' },

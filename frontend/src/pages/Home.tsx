@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAppStore } from '../store';
 
 const modules = [
-  { path: '/reparto-proporcional', label: 'Reparto Proporcional', cat: 'Fundamentos', desc: 'Distribución de un monto entre partes según pesos.' },
+  { path: '/razones-proporciones', label: 'Razones y Proporciones', cat: 'Fundamentos', desc: 'Relaciones y proporciones entre magnitudes.' },
   { path: '/interes-simple', label: 'Interés Simple', cat: 'Fundamentos', desc: 'I = P·i·n. Despejes de F, P, i, n.' },
   { path: '/descuento-simple', label: 'Descuento Simple', cat: 'Fundamentos', desc: 'Comercial y racional, conversión d↔i.' },
   { path: '/interes-compuesto', label: 'Interés Compuesto', cat: 'Compuesto', desc: 'F = P(1+i)ⁿ con comparativa visual.' },
