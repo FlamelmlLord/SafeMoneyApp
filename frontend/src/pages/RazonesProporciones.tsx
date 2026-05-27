@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Calculator } from '../components/Calculator';
 import { InputField, ResultValue, SelectField } from '../components/InputField';
 import { apiPost } from '../lib/api';
+import { fmtCOP } from '../lib/format';
 
 interface State {
   a: string;
@@ -11,9 +12,9 @@ interface State {
 }
 
 const inicial: State = {
-  a: '28',
-  b: '73000000',
-  c: '12',
+  a: '2',
+  b: '5',
+  c: '10',
   modo: 'razon',
 };
 
@@ -26,7 +27,10 @@ export const RazonesProporciones = () => {
     setError(null);
     try {
       const data = await apiPost<any>('/razones/calcular', {
-        ...state,
+        modo: state.modo,
+        a: state.a,
+        b: state.b,
+        c: state.c,
       });
       setResult(data);
     } catch (e: any) {
@@ -42,8 +46,8 @@ export const RazonesProporciones = () => {
       inputs={
         <div className="space-y-3">
           <SelectField label="Modo" value={state.modo} onChange={(v) => setState({ ...state, modo: v as any })} options={[
-            { value: 'razon', label: 'Razón Simple' },
-            { value: 'proporcion', label: 'Proporción' },
+            { value: 'razon', label: 'Razón Simple (a:b)' },
+            { value: 'proporcion', label: 'Proporción (a:b = c:x)' },
           ]} />
           <InputField label="Valor A" value={state.a} onChange={(v) => setState({ ...state, a: v })} />
           <InputField label="Valor B" value={state.b} onChange={(v) => setState({ ...state, b: v })} />
@@ -53,7 +57,18 @@ export const RazonesProporciones = () => {
       actions={<button className="btn-primary" onClick={calcular}>Calcular</button>}
       results={error ? <div className="text-danger">{error}</div> : result ? (
         <div className="space-y-3">
-          <ResultValue label="Resultado" value={JSON.stringify(result)} highlight />
+          {state.modo === 'razon' ? (
+            <>
+              <ResultValue label="Razón" value={result.razonFormato} highlight />
+              <ResultValue label="Valor" value={Number(result.valor).toFixed(4)} />
+            </>
+          ) : (
+            <>
+              <ResultValue label="Proporción" value={result.proporcion} highlight />
+              <ResultValue label="X (término desconocido)" value={result.x} />
+              <ResultValue label="Verificación" value={result.verificacion} />
+            </>
+          )}
         </div>
       ) : null}
     />
