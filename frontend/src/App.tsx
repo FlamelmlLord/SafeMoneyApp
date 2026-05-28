@@ -21,17 +21,13 @@ import { InteresCompuesto } from './pages/InteresCompuesto';
 import { DescuentoSimple } from './pages/DescuentoSimple';
 import { DescuentoRacional } from './pages/DescuentoRacional';
 // Tasas
-import { TasaNominalPeriodica } from './pages/TasaNominalPeriodica';
 import { TasaEfectiva } from './pages/TasaEfectiva';
 import { EquivalenciaTasas } from './pages/EquivalenciaTasas';
 import { TasaAnticipadaVencida } from './pages/TasaAnticipadaVencida';
 // Otros
 import { Capitalizacion } from './pages/Capitalizacion';
-import { AnualidadesVencidas } from './pages/AnualidadesVencidas';
-import { AnualidadesAnticipadas } from './pages/AnualidadesAnticipadas';
-import { AnualidadesDiferidas } from './pages/AnualidadesDiferidas';
 import { Perpetuidades } from './pages/Perpetuidades';
-import { AnualidadesGenerales } from './pages/AnualidadesGenerales';
+import { Anualidades } from './pages/Anualidades';
 import { Amortizacion } from './pages/Amortizacion';
 import { AbonosExtraTiempo } from './pages/AbonosExtraTiempo';
 import { AbonosExtraCuota } from './pages/AbonosExtraCuota';
@@ -68,8 +64,7 @@ export default function App() {
         <Route path="/descuento-simple" element={<DescuentoSimple />} />
         <Route path="/descuento-racional" element={<DescuentoRacional />} />
         
-        {/* Tasas */}
-        <Route path="/tasa-nominal-periodica" element={<TasaNominalPeriodica />} />
+        {/* Tasas */}        
         <Route path="/tasa-efectiva" element={<TasaEfectiva />} />
         <Route path="/equivalencia-tasas" element={<EquivalenciaTasas />} />
         <Route path="/tasa-anticipada-vencida" element={<TasaAnticipadaVencida />} />
@@ -77,12 +72,9 @@ export default function App() {
         {/* Capitalización */}
         <Route path="/capitalizacion" element={<Capitalizacion />} />
         
-        {/* Series Uniformes */}
-        <Route path="/anualidades-vencidas" element={<AnualidadesVencidas />} />
-        <Route path="/anualidades-anticipadas" element={<AnualidadesAnticipadas />} />
-        <Route path="/anualidades-diferidas" element={<AnualidadesDiferidas />} />
+        {/* Series Uniformes */}        
         <Route path="/perpetuidades" element={<Perpetuidades />} />
-        <Route path="/anualidades-generales" element={<AnualidadesGenerales />} />
+        <Route path="/anualidades" element={<Anualidades />} />
         
         {/* Amortización */}
         <Route path="/amortizacion" element={<Amortizacion />} />

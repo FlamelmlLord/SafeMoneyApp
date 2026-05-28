@@ -33,10 +33,7 @@ export const Home = () => {
           Aplicación web didáctica e interactiva para los conceptos del curso. Cada módulo incluye
           fórmula explicada, calculadora con paso a paso, diagramas y exportación CSV/JSON. Backend en
           PHP 8.2 con BCMath (precisión decimal arbitraria) y frontend en React + TypeScript.
-        </p>
-        <p className="text-xs text-text-subtle">
-          Preferencia activa: <span className="text-accent font-mono">{dayBase} días</span> ({dayBase === 360 ? 'comercial' : 'civil'})
-        </p>
+        </p>        
       </header>
 
       <section className="card border-accent/30 bg-accent-subtle/30">

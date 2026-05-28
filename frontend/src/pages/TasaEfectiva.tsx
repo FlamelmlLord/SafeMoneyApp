@@ -1,61 +1,189 @@
 import { useState } from 'react';
 import { Calculator } from '../components/Calculator';
-import { InputField, ResultValue, SelectField } from '../components/InputField';
+import {
+  InputField,
+  ResultValue,
+  SelectField
+} from '../components/InputField';
+
 import { ScenarioIO } from '../components/ScenarioIO';
 import { StepByStep } from '../components/StepByStep';
-import { apiPost, type CalcResultadoSimple } from '../lib/api';
-import { fmtRate } from '../lib/format';
+import { apiPost } from '../lib/api';
+import { fmtCOP, fmtRate } from '../lib/format';
 
-interface State { tipoOrigen: 'nominal' | 'periodica'; tasa: string; m: string }
-const inicial: State = { tipoOrigen: 'nominal', tasa: '0.24', m: '12' };
+interface State {
+  capital: string;
+  tasa: string;
+  tiempo: string;
+
+  tipo: 'vencida' | 'anticipada';
+
+  frecuenciaOrigen: string;
+  frecuenciaDestino: string;
+}
+
+const inicial: State = {
+  capital: '1000000',
+  tasa: '0.08',
+  tiempo: '1',
+
+  tipo: 'vencida',
+
+  frecuenciaOrigen: '12',
+  frecuenciaDestino: '4',
+};
+
+const frecuencias = [
+  { value: '360', label: 'Diaria' },
+  { value: '24', label: 'Quincenal' },
+  { value: '12', label: 'Mensual' },
+  { value: '6', label: 'Bimestral' },
+  { value: '4', label: 'Trimestral' },
+  { value: '3', label: 'Cuatrimestral' },
+  { value: '2', label: 'Semestral' },
+  { value: '1', label: 'Anual' },
+];
 
 export const TasaEfectiva = () => {
+
   const [s, setS] = useState<State>(inicial);
-  const [r, setR] = useState<CalcResultadoSimple | null>(null);
+
+  const [r, setR] = useState<any | null>(null);
+
   const [err, setErr] = useState<string | null>(null);
 
   const calcular = async () => {
+
     setErr(null);
+
     try {
-      const m = Number(s.m);
-      setR(await apiPost('/tasas/convertir', { tipoOrigen: s.tipoOrigen, tipoDestino: 'efectiva', tasa: s.tasa, mOrigen: m, mDestino: 1 }));
-    } catch (e: any) { setErr(e.message); }
+
+      const data = await apiPost(
+        '/tasas/tasa-efectiva-comparar',
+        {
+          capital: s.capital,
+          tasa: s.tasa,
+          tiempo: s.tiempo,
+
+          tipo: s.tipo,
+
+          mOrigen: Number(s.frecuenciaOrigen),
+          mDestino: Number(s.frecuenciaDestino),
+        }
+      );
+
+      setR(data);
+
+    } catch (e: any) {
+
+      setErr(e.message);
+    }
   };
 
   return (
     <Calculator
-      title="Tasa Efectiva Anual (EA / Iea)"
-      category="Compuesto y tasas"
-      description="La tasa efectiva anual mide la rentabilidad o costo real anual considerando la capitalización. Útil para comparar productos con frecuencias distintas."
-      formula="EA = (1 + i)^m - 1"
+      title="Tasas Efectivas"
+      category="Tasas"
+
+      description="
+Convierte tasas efectivas entre diferentes periodos y compara el monto final de una inversión usando capitalización compuesta.
+      "
+
+      formula="F = P(1+i)^n"
+
       inputs={
         <div className="space-y-3">
-          <SelectField label="Tipo de tasa origen" value={s.tipoOrigen} onChange={(v) => setS({ ...s, tipoOrigen: v as any })} options={[
-            { value: 'nominal', label: 'Nominal anual (J)' },
-            { value: 'periodica', label: 'Periódica (i)' },
-          ]} />
-          <InputField label={s.tipoOrigen === 'nominal' ? 'J' : 'i'} value={s.tasa} onChange={(v) => setS({ ...s, tasa: v })} hint="Decimal: 0.24 = 24%" />
-          <SelectField label="Frecuencia m" value={s.m} onChange={(v) => setS({ ...s, m: v })} options={[
-            { value: '12', label: 'Mensual (12)' },
-            { value: '6', label: 'Bimestral (6)' },
-            { value: '4', label: 'Trimestral (4)' },
-            { value: '3', label: 'Cuatrimestral (3)' },
-            { value: '2', label: 'Semestral (2)' },
-            { value: '24', label: 'Quincenal (24)' },
-            { value: '360', label: 'Diaria (360)' },
-          ]} />
+
+          <InputField
+            label="Capital"
+            value={s.capital}
+            onChange={(v) => setS({ ...s, capital: v })}
+            suffix="COP"
+          />
+
+          <InputField
+            label="Tasa"
+            value={s.tasa}
+            onChange={(v) => setS({ ...s, tasa: v })}
+            hint="0.08 = 8%"
+          />
+
+          <InputField
+            label="Tiempo (años)"
+            value={s.tiempo}
+            onChange={(v) => setS({ ...s, tiempo: v })}
+          />
+
+          <SelectField
+            label="Tipo de tasa"
+            value={s.tipo}
+            onChange={(v) => setS({ ...s, tipo: v as any })}
+            options={[
+              { value: 'vencida', label: 'Vencida' },
+              { value: 'anticipada', label: 'Anticipada' },
+            ]}
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+
+            <SelectField
+              label="Frecuencia origen"
+              value={s.frecuenciaOrigen}
+              onChange={(v) => setS({ ...s, frecuenciaOrigen: v })}
+              options={frecuencias}
+            />
+
+            <SelectField
+              label="Frecuencia destino"
+              value={s.frecuenciaDestino}
+              onChange={(v) => setS({ ...s, frecuenciaDestino: v })}
+              options={frecuencias}
+            />
+
+          </div>
+
         </div>
       }
-      actions={<>
-        <button className="btn-primary" onClick={calcular}>Calcular EA</button>
-        <ScenarioIO moduleId="tasa-efectiva" state={s} onImport={setS} />
-      </>}
-      results={err ? <div className="text-danger">{err}</div> : r ? (
-        <div className="space-y-3">
-          <ResultValue label="Tasa Efectiva Anual (EA)" value={fmtRate(r.resultado)} highlight />
-          <StepByStep pasos={r.pasos} />
-        </div>
-      ) : null}
+
+      actions={
+        <>
+          <button
+            className="btn-primary"
+            onClick={calcular}
+          >
+            Calcular
+          </button>
+
+          <ScenarioIO
+            moduleId="tasas-efectivas"
+            state={s}
+            onImport={setS}
+          />
+        </>
+      }
+
+      results={
+        err ? (
+          <div className="text-danger">{err}</div>
+        ) : r ? (
+          <div className="space-y-3">
+
+            <ResultValue
+              label="Tasa equivalente"
+              value={fmtRate(r.tasaEquivalente)}
+            />
+
+            <ResultValue
+              label="Monto final"
+              value={fmtCOP(r.montoFinal)}
+              highlight
+            />
+
+            <StepByStep pasos={r.pasos} />
+
+          </div>
+        ) : null
+      }
     />
   );
 };

@@ -331,86 +331,105 @@ $app->post('/api/v1/tasas/convertir', function ($req, $res) {
 
 $app->post('/api/v1/tasas/anticipada-vencida', function ($req, $res) {
     $b = (array) $req->getParsedBody();
-    $direccion = Validators::str($b, 'direccion', ['v-a', 'a-v']);
-    $tasa = Validators::num($b, 'tasa');
-    $data = $direccion === 'v-a' ? Rate::vencidaToAnticipada($tasa) : Rate::anticipadaToVencida($tasa);
+    $data = Rate::convertirAnticipadas(
+        Validators::str($b, 'tipoOrigen'),
+        Validators::str($b, 'tipoDestino'),
+        Validators::num($b, 'tasa'),
+        Validators::int($b, 'mOrigen'),
+        Validators::int($b, 'mDestino')
+    );
+    return Errors::ok($res, $data);
+});
+
+$app->post('/api/v1/tasas/equivalencia-simple', function ($req, $res) {
+    $b = (array) $req->getParsedBody();
+    $data = Rate::equivalenciaSimple(
+        Validators::str($b, 'tipoOrigen'),
+        Validators::str($b, 'tipoDestino'),
+        Validators::num($b, 'tasa'),
+        Validators::int($b, 'm')
+    );
+    return Errors::ok($res, $data);
+});
+
+$app->post('/api/v1/tasas/tasa-efectiva-comparar', function ($req, $res) {
+    $b = (array)$req->getParsedBody();
+    $data = Rate::tasaEfectivaComparar(
+        Validators::num($b, 'capital'),
+        Validators::num($b, 'tasa'),
+        Validators::num($b, 'tiempo'),
+        Validators::str($b, 'tipo'),
+        Validators::int($b, 'mOrigen'),
+        Validators::int($b, 'mDestino')
+    );
     return Errors::ok($res, $data);
 });
 
 // ─── Anualidades ──────────────────────────────────────────────────────────
-$app->post('/api/v1/anualidades/calcular', function ($req, $res) {
-    $b = (array) $req->getParsedBody();
-    $tipo = Validators::str($b, 'tipo', ['vencida', 'anticipada', 'diferida', 'perpetuidad-vencida', 'perpetuidad-anticipada']);
-    $calcular = Validators::str($b, 'calcular', ['P', 'F', 'A', 'n', 'i']);
-    $A = Validators::num($b, 'A', false);
-    $P = Validators::num($b, 'P', false);
-    $F = Validators::num($b, 'F', false);
-    $i = Validators::num($b, 'i', false);
-    $n = Validators::num($b, 'n', false);
-    $k = Validators::int($b, 'k', false);
-
-    $data = match (true) {
-        $tipo === 'vencida' && $calcular === 'P' => Annuity::valorPresenteVencida($A, $i, $n),
-        $tipo === 'vencida' && $calcular === 'F' => Annuity::valorFuturoVencida($A, $i, $n),
-        $tipo === 'vencida' && $calcular === 'A' && $P !== null => Annuity::cuotaDadoP($P, $i, $n),
-        $tipo === 'vencida' && $calcular === 'A' && $F !== null => Annuity::cuotaDadoF($F, $i, $n),
-        $tipo === 'vencida' && $calcular === 'n' => Annuity::calcularN($A, $F, $i),
-        $tipo === 'vencida' && $calcular === 'i' => Annuity::calcularI($A, $F, $n),
-        $tipo === 'anticipada' && $calcular === 'P' => Annuity::valorPresenteAnticipada($A, $i, $n),
-        $tipo === 'anticipada' && $calcular === 'F' => Annuity::valorFuturoAnticipada($A, $i, $n),
-        $tipo === 'diferida' => Annuity::valorPresenteDiferida($A, $i, $n, $k ?? 0),
-        $tipo === 'perpetuidad-vencida' => Annuity::perpetuidadVencida($A, $i),
-        $tipo === 'perpetuidad-anticipada' => Annuity::perpetuidadAnticipada($A, $i),
-        default => throw new InvalidArgumentException("Combinación tipo='$tipo' y calcular='$calcular' no soportada"),
-    };
+$app->post('/api/v1/anualidades/unificadas', function ($req, $res) {
+    $b = (array)$req->getParsedBody();
+    $data = Annuity::resolver($b);
     return Errors::ok($res, $data);
 });
 
-// ─── Amortización ─────────────────────────────────────────────────────────
-$app->post('/api/v1/amortizacion/generar', function ($req, $res) {
+$app->post('/api/v1/anualidades/perpetuidad', function ($req, $res) {
     $b = (array) $req->getParsedBody();
-    $data = Amortization::generar(
-        Validators::str($b, 'sistema', ['frances', 'aleman', 'americano', 'colombiano']),
-        Validators::num($b, 'P'),
-        Validators::num($b, 'i'),
-        Validators::int($b, 'n'),
-        Validators::num($b, 'inflacion', false) ?? '0'
+    $data = Annuity::perpetuidad(
+        Validators::str($b, 'tipo'),
+        Validators::str($b, 'tipoTasa'),
+        Validators::num($b, 'A'),
+        Validators::num($b, 'tasa'),
+        Validators::int($b, 'm'),
     );
     return Errors::ok($res, $data);
 });
 
-// ─── Abonos extra ─────────────────────────────────────────────────────────
-$app->post('/api/v1/abonos-extra/reducir-tiempo', function ($req, $res) {
-    $b = (array) $req->getParsedBody();
-    $data = ExtraPayment::reducirTiempo(
-        Validators::num($b, 'P'),
-        Validators::num($b, 'i'),
-        Validators::int($b, 'n'),
-        Validators::num($b, 'abono'),
-        Validators::int($b, 'periodoAbono')
-    );
-    return Errors::ok($res, $data);
-});
+// ─── Tabla de amortización ─────────────────────────────
 
-$app->post('/api/v1/abonos-extra/reducir-cuota', function ($req, $res) {
-    $b = (array) $req->getParsedBody();
-    $data = ExtraPayment::reducirCuota(
-        Validators::num($b, 'P'),
-        Validators::num($b, 'i'),
-        Validators::int($b, 'n'),
-        Validators::num($b, 'abono'),
-        Validators::int($b, 'periodoAbono')
-    );
-    return Errors::ok($res, $data);
-});
+$app->post(
+    '/api/v1/amortizacion/calcular',
+    function ($req, $res) {
+
+        $b = (array)
+        $req->getParsedBody();
+
+        $data =
+            \App\Finance\Amortization::calcular(
+
+                Validators::num(
+                    $b,
+                    'P'
+                ),
+
+                Validators::num(
+                    $b,
+                    'i'
+                ),
+
+                Validators::int(
+                    $b,
+                    'n'
+                ),
+
+                $b['abonos'] ?? []
+            );
+
+        return Errors::ok(
+            $res,
+            $data
+        );
+    }
+);
 
 // ─── Ecuaciones de valor ──────────────────────────────────────────────────
 $app->post('/api/v1/ecuaciones-valor/resolver', function ($req, $res) {
-    $b = (array) $req->getParsedBody();
+    $b = (array)$req->getParsedBody();
     $data = ValueEquation::resolver(
-        Validators::required($b, 'flujos'),
-        Validators::int($b, 'fechaFocal'),
-        Validators::num($b, 'i')
+        $b['flujos'],
+        (int)$b['fechaFocal'],
+        $b['i'],
+        $b['tipoTasa'],
+        (int)$b['frecuencia']
     );
     return Errors::ok($res, $data);
 });

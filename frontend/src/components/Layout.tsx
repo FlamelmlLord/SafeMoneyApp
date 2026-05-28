@@ -31,15 +31,14 @@ const modulos = [
   },
   {
     categoria: 'Interés Compuesto', items: [
-      { path: '/interes-compuesto', label: 'Interese Compuesto' },      
+      { path: '/interes-compuesto', label: 'Interes Compuesto' },      
     ]
   },
   {
-    categoria: 'Tasas', items: [
-      { path: '/tasa-nominal-periodica', label: 'Nominal ↔ Periódica' },
-      { path: '/tasa-efectiva', label: 'Efectiva Anual' },
+    categoria: 'Tasas', items: [      
       { path: '/equivalencia-tasas', label: 'Equivalencia de Tasas' },
-      { path: '/tasa-anticipada-vencida', label: 'Anticipada ↔ Vencida' },
+      { path: '/tasa-anticipada-vencida', label: 'Equivalencia de Tasas Anticipadas' },
+      { path: '/tasa-efectiva', label: 'Tasas Efectivas' },            
     ]
   },
   {
@@ -48,19 +47,14 @@ const modulos = [
     ]
   },
   {
-    categoria: 'Series Uniformes', items: [
-      { path: '/anualidades-vencidas', label: 'Anualidad Ordinaria (Vencida)' },
-      { path: '/anualidades-anticipadas', label: 'Anualidad Anticipada' },
-      { path: '/anualidades-diferidas', label: 'Anualidad Diferida' },
-      { path: '/perpetuidades', label: 'Perpetuidad' },
-      { path: '/anualidades-generales', label: 'Anualidad General' },
+    categoria: 'Series Uniformes', items: [      
+      { path: '/anualidades', label: 'Anualidades' },
+      { path: '/perpetuidades', label: 'Perpetuidad' },      
     ]
   },
   {
     categoria: 'Amortización', items: [
-      { path: '/amortizacion', label: 'Tablas de Amortización' },
-      { path: '/abonos-extra-tiempo', label: 'Abonos Extra (Reducir Tiempo)' },
-      { path: '/abonos-extra-cuota', label: 'Abonos Extra (Reducir Cuota)' },
+      { path: '/amortizacion', label: 'Tablas de Amortización' },      
     ]
   },
 ];
@@ -76,27 +70,7 @@ export const Layout = () => {
           <NavLink to="/" className="flex items-center gap-3">
             <span className="text-xl font-bold tracking-tight text-text">IE</span>
             <span className="text-sm text-text-muted hidden sm:inline">Ingeniería Económica</span>
-          </NavLink>
-
-          <div className="flex items-center gap-3">
-            <label className="text-xs text-text-muted hidden md:inline">Tipo de año:</label>
-            <div className="inline-flex rounded-lg border border-bg-border p-0.5">
-              {([360, 365] as DayBase[]).map((b) => (
-                <button
-                  key={b}
-                  onClick={() => setDayBase(b)}
-                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${dayBase === b ? 'bg-accent text-bg' : 'text-text-muted hover:text-text'
-                    }`}
-                  aria-pressed={dayBase === b}
-                >
-                  {b} días
-                </button>
-              ))}
-            </div>
-            <span className="text-xs text-text-subtle hidden lg:inline">
-              ({dayBase === 360 ? 'comercial' : 'civil'})
-            </span>
-          </div>
+          </NavLink>          
         </div>
       </header>
 
