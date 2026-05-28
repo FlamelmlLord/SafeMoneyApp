@@ -13,11 +13,10 @@ import { RepartoMixto } from './pages/RepartoMixto';
 // Interés Simple
 import { InteresSimple } from './pages/InteresSimple';
 import { InteresSimpleMetodos } from './pages/InteresSimpleMetodos';
+//Diagrama de Flujo de Caja
+import { DiagramaFlujoCaja } from './pages/DiagramaFlujoCaja';
 // Interés Compuesto
 import { InteresCompuesto } from './pages/InteresCompuesto';
-import { InteresCompuestoPresente } from './pages/InteresCompuestoPresente';
-import { InteresCompuestoTiempo } from './pages/InteresCompuestoTiempo';
-import { InteresCompuestoTasa } from './pages/InteresCompuestoTasa';
 // Descuento Simple
 import { DescuentoSimple } from './pages/DescuentoSimple';
 import { DescuentoRacional } from './pages/DescuentoRacional';
@@ -58,12 +57,12 @@ export default function App() {
         {/* Interés Simple */}
         <Route path="/interes-simple" element={<InteresSimple />} />
         <Route path="/interes-simple-metodos" element={<InteresSimpleMetodos />} />
+
+        {/* Diagrama de Flujo de Caja */}
+        <Route path="/diagramas-flujo-caja" element={<DiagramaFlujoCaja />} />
         
         {/* Interés Compuesto */}
-        <Route path="/interes-compuesto" element={<InteresCompuesto />} />
-        <Route path="/interes-compuesto-presente" element={<InteresCompuestoPresente />} />
-        <Route path="/interes-compuesto-tiempo" element={<InteresCompuestoTiempo />} />
-        <Route path="/interes-compuesto-tasa" element={<InteresCompuestoTasa />} />
+        <Route path="/interes-compuesto" element={<InteresCompuesto />} />        
         
         {/* Descuento Simple */}
         <Route path="/descuento-simple" element={<DescuentoSimple />} />

@@ -73,7 +73,48 @@ class RazonesProporciones
             'b' => $b,
             'c' => $c,
             'x' => $x,
-            'proporcion' => "$a:$b = $c:$x",
+            'proporcion' => "$a:$b :: $c:$x",
+            'razonIzquierda' => $razonIzq,
+            'razonDerecha' => $razonDer,
+            'sonIguales' => $sonIguales,
+            'verificacion' => $sonIguales ? 'Proporción válida' : 'Proporción inválida',
+        ];
+    }
+
+    /**
+     * Calcula C en una proporción: si a/b = c/x, encuentra c
+     * c = (a * x) / b
+     * 
+     * @param string|int|float $a Primera cantidad de la razón conocida
+     * @param string|int|float $b Segunda cantidad de la razón conocida
+     * @param string|int|float $x Segunda cantidad de la proporción
+     * @return array
+     */
+    public static function calcularC($a, $b, $x): array
+    {
+        $a = Money::normalize($a);
+        $b = Money::normalize($b);
+        $x = Money::normalize($x);
+        
+        if ($b === '0') {
+            throw new InvalidArgumentException('El divisor no puede ser cero');
+        }
+        
+        // c = (a * x) / b
+        $numerador = bcmul($a, $x, self::SCALE);
+        $c = bcdiv($numerador, $b, self::SCALE);
+        
+        // Verificación
+        $razonIzq = bcdiv($a, $b, self::SCALE);
+        $razonDer = bcdiv($c, $x, self::SCALE);
+        $sonIguales = abs((float) $razonIzq - (float) $razonDer) < 0.0001;
+        
+        return [
+            'a' => $a,
+            'b' => $b,
+            'c' => $c,
+            'x' => $x,
+            'proporcion' => "$a:$b :: $c:$x",
             'razonIzquierda' => $razonIzq,
             'razonDerecha' => $razonDer,
             'sonIguales' => $sonIguales,

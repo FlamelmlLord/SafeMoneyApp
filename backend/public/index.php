@@ -11,6 +11,9 @@ use App\Finance\ExtraPayment;
 use App\Finance\ProportionalSplit;
 use App\Finance\Rate;
 use App\Finance\RazonesProporciones;
+use App\Finance\RepartoDirectoSimple;
+use App\Finance\RepartoInversoSimple;
+use App\Finance\RepartoDirectoCompuesto;
 use App\Finance\SimpleDiscount;
 use App\Finance\SimpleInterest;
 use App\Finance\ValueEquation;
@@ -27,10 +30,10 @@ $app->addRoutingMiddleware();
 // CORS middleware
 $app->add(function (ServerRequestInterface $request, $handler): ResponseInterface {
     // En producción, reemplaza '*' con tu dominio: 'https://tudominio.com'
-    $allowedOrigin = getenv('APP_ENV') === 'production' 
+    $allowedOrigin = getenv('APP_ENV') === 'production'
         ? getenv('ALLOWED_ORIGIN') ?: $_SERVER['HTTP_HOST']
         : '*';
-    
+
     $response = $request->getMethod() === 'OPTIONS'
         ? new \Slim\Psr7\Response()
         : $handler->handle($request);
@@ -60,7 +63,7 @@ $errorMiddleware->setDefaultErrorHandler(function (ServerRequestInterface $req, 
 // Página raíz: sirve el frontend compilado si está disponible
 $app->get('/', function ($req, $res) {
     $frontendIndex = __DIR__ . '/dist/index.html';
-    
+
     if (file_exists($frontendIndex)) {
         // Frontend compilado disponible
         return $res->withStatus(200)
@@ -70,7 +73,7 @@ $app->get('/', function ($req, $res) {
                     ->createStreamFromFile($frontendIndex)
             );
     }
-    
+
     // Fallback: información de la API si el frontend no está compilado
     return Errors::ok($res, [
         'app' => 'Ingeniería Económica - API',
@@ -118,18 +121,80 @@ $app->post('/api/v1/reparto/simple', function ($req, $res) {
     return Errors::ok($res, ProportionalSplit::simple($monto, $partes));
 });
 
-$app->post('/api/v1/reparto/compuesto', function ($req, $res) {
+$app->post('/api/v1/reparto/directo-simple', function ($req, $res) {
     $b = (array) $req->getParsedBody();
     $monto = Validators::num($b, 'monto');
-    $partes = Validators::required($b, 'partes');
-    return Errors::ok($res, ProportionalSplit::compuesto($monto, $partes));
+    $metodo = Validators::str(
+        $b,
+        'metodo',
+        ['proporciones', 'reduccion', 'alicuotas']
+    );
+    $partes = Validators::required(
+        $b,
+        'partes'
+    );
+    $data = RepartoDirectoSimple::calcular(
+        $monto,
+        $partes,
+        $metodo
+    );
+    return Errors::ok($res, $data);
+});
+
+$app->post('/api/v1/reparto/directo-compuesto', function ($req, $res) {
+    $b = (array) $req->getParsedBody();
+    $data = ProportionalSplit::directoCompuesto(
+        Validators::num($b, 'monto'),
+        Validators::required($b, 'partes')
+    );
+    return Errors::ok($res, $data);
+});
+
+$app->post('/api/v1/reparto/inverso-compuesto', function ($req, $res) {
+    $b = (array) $req->getParsedBody();
+    $monto = Validators::num($b, 'monto');
+    $partes = Validators::required(
+        $b,
+        'partes'
+    );
+    $data = ProportionalSplit::inversoCompuesto(
+        $monto,
+        $partes
+    );
+    return Errors::ok($res, $data);
+});
+
+$app->post('/api/v1/reparto/inverso-simple', function ($req, $res) {
+    $b = (array) $req->getParsedBody();
+    $monto = Validators::num($b, 'monto');
+    $partes = Validators::required(
+        $b,
+        'partes'
+    );
+    $data = RepartoInversoSimple::calcular(
+        $monto,
+        $partes
+    );
+    return Errors::ok($res, $data);
+});
+
+$app->post('/api/v1/reparto/mixto', function ($req, $res) {
+
+    $b = (array) $req->getParsedBody();
+
+    $data = ProportionalSplit::mixto(
+        Validators::num($b, 'monto'),
+        Validators::required($b, 'partes')
+    );
+
+    return Errors::ok($res, $data);
 });
 
 // ─── Razones y proporciones ───────────────────────────────────────────────
 $app->post('/api/v1/razones/calcular', function ($req, $res) {
     $b = (array) $req->getParsedBody();
     $modo = Validators::str($b, 'modo', ['razon', 'proporcion']);
-    
+
     if ($modo === 'razon') {
         $data = RazonesProporciones::razonSimple(
             Validators::num($b, 'a'),
@@ -142,7 +207,7 @@ $app->post('/api/v1/razones/calcular', function ($req, $res) {
         if ($calcular === null) {
             $calcular = 'x';
         }
-        
+
         if ($calcular === 'x') {
             $data = RazonesProporciones::cuartaProporcional(
                 Validators::num($b, 'a'),
@@ -158,7 +223,7 @@ $app->post('/api/v1/razones/calcular', function ($req, $res) {
             );
         }
     }
-    
+
     return Errors::ok($res, $data);
 });
 
@@ -174,6 +239,35 @@ $app->post('/api/v1/interes-simple/calcular', function ($req, $res) {
     };
     return Errors::ok($res, $data);
 });
+
+$app->post('/api/v1/interes-simple/metodos', function ($req, $res) {
+    $b = (array) $req->getParsedBody();
+    $data = SimpleInterest::calcularConMetodo(
+        Validators::str(
+            $b,
+            'calcular',
+            ['F', 'P', 'i', 'n', 'I']
+        ),
+        $b['P'] ?? null,
+        $b['F'] ?? null,
+        $b['i'] ?? null,
+        $b['dias'] ?? null,
+        $b['meses'] ?? null,
+        $b['anio'] ?? null,
+        Validators::str(
+            $b,
+            'metodo',
+            [
+                'bancario',
+                'comercial',
+                'racional',
+                'ideal'
+            ]
+        )
+    );
+    return Errors::ok($res, $data);
+});
+
 
 // ─── Descuento simple ─────────────────────────────────────────────────────
 $app->post('/api/v1/descuento-simple/calcular', function ($req, $res) {

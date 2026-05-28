@@ -2,52 +2,67 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAppStore, type DayBase } from '../store';
 
 const modulos = [
-  { categoria: 'Fundamentos', items: [
-    { path: '/razones-proporciones', label: 'Razones y Proporciones' },
-  ]},
-  { categoria: 'Repartos', items: [
-    { path: '/reparto-directo-simple', label: 'Directo Simple' },
-    { path: '/reparto-inverso-simple', label: 'Inverso Simple' },
-    { path: '/reparto-directo-compuesto', label: 'Directo Compuesto' },
-    { path: '/reparto-inverso-compuesto', label: 'Inverso Compuesto' },
-    { path: '/reparto-mixto', label: 'Reparto Mixto' },
-  ]},
-  { categoria: 'Interés Simple', items: [
-    { path: '/interes-simple', label: 'Cálculos Básicos' },
-    { path: '/interes-simple-metodos', label: 'Métodos (Bancario, Comercial, etc)' },
-  ]},
-  { categoria: 'Interés Compuesto', items: [
-    { path: '/interes-compuesto', label: 'Valor Futuro' },
-    { path: '/interes-compuesto-presente', label: 'Valor Presente' },
-    { path: '/interes-compuesto-tiempo', label: 'Tiempo' },
-    { path: '/interes-compuesto-tasa', label: 'Tasa' },
-    { path: '/capitalizacion', label: 'Capitalización' },
-  ]},
-  { categoria: 'Descuento Simple', items: [
-    { path: '/descuento-simple', label: 'Comercial' },
-    { path: '/descuento-racional', label: 'Racional (Matemático)' },
-  ]},
-  { categoria: 'Tasas', items: [
-    { path: '/tasa-nominal-periodica', label: 'Nominal ↔ Periódica' },
-    { path: '/tasa-efectiva', label: 'Efectiva Anual' },
-    { path: '/equivalencia-tasas', label: 'Equivalencia de Tasas' },
-    { path: '/tasa-anticipada-vencida', label: 'Anticipada ↔ Vencida' },
-  ]},
-  { categoria: 'Ecuaciones de Valor', items: [
-    { path: '/ecuaciones-valor', label: 'Equivalencia en Fechas Focales' },
-  ]},
-  { categoria: 'Series Uniformes', items: [
-    { path: '/anualidades-vencidas', label: 'Anualidad Ordinaria (Vencida)' },
-    { path: '/anualidades-anticipadas', label: 'Anualidad Anticipada' },
-    { path: '/anualidades-diferidas', label: 'Anualidad Diferida' },
-    { path: '/perpetuidades', label: 'Perpetuidad' },
-    { path: '/anualidades-generales', label: 'Anualidad General' },
-  ]},
-  { categoria: 'Amortización', items: [
-    { path: '/amortizacion', label: 'Tablas de Amortización' },
-    { path: '/abonos-extra-tiempo', label: 'Abonos Extra (Reducir Tiempo)' },
-    { path: '/abonos-extra-cuota', label: 'Abonos Extra (Reducir Cuota)' },
-  ]},
+  {
+    categoria: 'Fundamentos', items: [
+      { path: '/razones-proporciones', label: 'Razones y Proporciones' },
+    ]
+  },
+  {
+    categoria: 'Repartos', items: [
+      { path: '/reparto-directo-simple', label: 'Directo Simple' },
+      { path: '/reparto-inverso-simple', label: 'Inverso Simple' },
+      { path: '/reparto-directo-compuesto', label: 'Directo Compuesto' },
+      { path: '/reparto-inverso-compuesto', label: 'Inverso Compuesto' },
+      { path: '/reparto-mixto', label: 'Reparto Mixto' },
+    ]
+  },
+  {
+    categoria: 'Interés Simple', items: [
+      { path: '/interes-simple', label: 'Cálculos Básicos' },
+      { path: '/interes-simple-metodos', label: 'Métodos (Bancario, Comercial, etc)' },
+      { path: '/diagramas-flujo-caja', label: 'Diagramas de Flujo de Caja' },
+    ]
+  },
+  {
+    categoria: 'Descuento Simple', items: [
+      { path: '/descuento-simple', label: 'Comercial' },
+      { path: '/descuento-racional', label: 'Racional (Matemático)' },
+    ]
+  },
+  {
+    categoria: 'Interés Compuesto', items: [
+      { path: '/interes-compuesto', label: 'Interese Compuesto' },      
+    ]
+  },
+  {
+    categoria: 'Tasas', items: [
+      { path: '/tasa-nominal-periodica', label: 'Nominal ↔ Periódica' },
+      { path: '/tasa-efectiva', label: 'Efectiva Anual' },
+      { path: '/equivalencia-tasas', label: 'Equivalencia de Tasas' },
+      { path: '/tasa-anticipada-vencida', label: 'Anticipada ↔ Vencida' },
+    ]
+  },
+  {
+    categoria: 'Ecuaciones de Valor', items: [
+      { path: '/ecuaciones-valor', label: 'Equivalencia en Fechas Focales' },
+    ]
+  },
+  {
+    categoria: 'Series Uniformes', items: [
+      { path: '/anualidades-vencidas', label: 'Anualidad Ordinaria (Vencida)' },
+      { path: '/anualidades-anticipadas', label: 'Anualidad Anticipada' },
+      { path: '/anualidades-diferidas', label: 'Anualidad Diferida' },
+      { path: '/perpetuidades', label: 'Perpetuidad' },
+      { path: '/anualidades-generales', label: 'Anualidad General' },
+    ]
+  },
+  {
+    categoria: 'Amortización', items: [
+      { path: '/amortizacion', label: 'Tablas de Amortización' },
+      { path: '/abonos-extra-tiempo', label: 'Abonos Extra (Reducir Tiempo)' },
+      { path: '/abonos-extra-cuota', label: 'Abonos Extra (Reducir Cuota)' },
+    ]
+  },
 ];
 
 export const Layout = () => {
@@ -70,9 +85,8 @@ export const Layout = () => {
                 <button
                   key={b}
                   onClick={() => setDayBase(b)}
-                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${
-                    dayBase === b ? 'bg-accent text-bg' : 'text-text-muted hover:text-text'
-                  }`}
+                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${dayBase === b ? 'bg-accent text-bg' : 'text-text-muted hover:text-text'
+                    }`}
                   aria-pressed={dayBase === b}
                 >
                   {b} días
@@ -100,10 +114,9 @@ export const Layout = () => {
                       <NavLink
                         to={item.path}
                         className={({ isActive }) =>
-                          `block px-3 py-1.5 text-sm rounded-md transition-colors ${
-                            isActive
-                              ? 'bg-accent-subtle text-accent'
-                              : 'text-text-muted hover:text-text hover:bg-bg-elevated'
+                          `block px-3 py-1.5 text-sm rounded-md transition-colors ${isActive
+                            ? 'bg-accent-subtle text-accent'
+                            : 'text-text-muted hover:text-text hover:bg-bg-elevated'
                           }`
                         }
                       >

@@ -80,4 +80,182 @@ final class SimpleInterest
             ],
         ];
     }
+
+    public static function calcularConMetodo(
+        string $calcular,
+        string|float|null $P,
+        string|float|null $F,
+        string|float|null $i,
+        string|float|null $dias,
+        string|float|null $meses,
+        string|float|null $anio,
+        string $metodo
+    ): array {
+
+        $baseDias = 360;
+
+        /*
+    |--------------------------------------------------------------------------
+    | CONVERSIÓN DEL TIEMPO
+    |--------------------------------------------------------------------------
+    */
+
+        if ($metodo === 'comercial') {
+
+            // mes = 30
+            // año = 360
+
+            $diasCalculados = bcmul(
+                (string)($meses ?? '0'),
+                '30',
+                10
+            );
+
+            $baseDias = 360;
+        } elseif ($metodo === 'ideal') {
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDEAL
+            |--------------------------------------------------------------------------
+            | Usa:
+            | - días reales del mes
+            | - año real (365 o 366)
+            */
+
+            $mes = strtolower((string)($meses ?? 'febrero'));
+
+            $anioNumero = (int)($anio ?? date('Y'));
+
+            $bisiesto = self::esBisiesto($anioNumero);
+
+            $diasMes = match ($mes) {
+
+                'enero' => 31,
+                'febrero' => $bisiesto ? 29 : 28,
+                'marzo' => 31,
+                'abril' => 30,
+                'mayo' => 31,
+                'junio' => 30,
+                'julio' => 31,
+                'agosto' => 31,
+                'septiembre' => 30,
+                'octubre' => 31,
+                'noviembre' => 30,
+                'diciembre' => 31,
+
+                default => throw new \InvalidArgumentException(
+                    'Mes inválido'
+                ),
+            };
+
+            $diasCalculados = (string)$diasMes;
+
+            $baseDias = $bisiesto ? 366 : 365;
+        } elseif ($metodo === 'bancario') {
+
+            // días reales
+            // año = 360
+
+            $diasCalculados = (string)($dias ?? '0');
+
+            $baseDias = 360;
+        } else {
+
+            // racional
+
+            $diasCalculados = (string)($dias ?? '0');
+
+            $baseDias = self::esBisiesto(
+                (int)($anio ?? date('Y'))
+            ) ? 366 : 365;
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | CONVERTIR AÑOS
+    |--------------------------------------------------------------------------
+    */
+
+        $nConvertido = bcdiv(
+            $diasCalculados,
+            (string)$baseDias,
+            10
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | CÁLCULOS
+    |--------------------------------------------------------------------------
+    */
+
+        $resultado = match ($calcular) {
+
+            'F' => self::calcularF(
+                $P,
+                $i,
+                $nConvertido
+            ),
+
+            'P' => self::calcularP(
+                $F,
+                $i,
+                $nConvertido
+            ),
+
+            'i' => self::calcularI(
+                $P,
+                $F,
+                $nConvertido
+            ),
+
+            'n' => [
+
+                ...self::calcularN(
+                    $P,
+                    $F,
+                    $i
+                ),
+
+                'resultado' => bcmul(
+                    self::calcularN(
+                        $P,
+                        $F,
+                        $i
+                    )['resultado'],
+                    (string)$baseDias,
+                    10
+                )
+            ],
+
+            'I' => self::interesTotal(
+                $P,
+                $i,
+                $nConvertido
+            ),
+
+            default => throw new \InvalidArgumentException(
+                'Tipo de cálculo inválido'
+            ),
+        };
+
+        return [
+
+            ...$resultado,
+
+            'metodo' => ucfirst($metodo),
+
+            'baseDias' => $baseDias,
+
+            'diasCalculados' => $diasCalculados,
+
+            'nConvertido' => $nConvertido,
+        ];
+    }
+
+    private static function esBisiesto(int $anio): bool
+    {
+        return ($anio % 4 === 0 && $anio % 100 !== 0)
+            || ($anio % 400 === 0);
+    }
 }
